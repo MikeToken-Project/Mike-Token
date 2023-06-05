@@ -1,0 +1,10 @@
+node_modules/
+build/
+.private_key.mainnet
+.private_key.testnet
+.openzeppelin/
+.env
+typeChain/
+artifacts/
+cache/
+.idea/
