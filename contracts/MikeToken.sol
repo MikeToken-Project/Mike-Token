@@ -354,10 +354,8 @@ abstract contract Ownable is Context {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     constructor () {
-        // TODO update owner to 0x88c2bC5d6264c9237a13c5c0a017F0611e0a88BC
-        address msgSender = _msgSender();
-        _owner = msgSender;
-        emit OwnershipTransferred(address(0), msgSender);
+        _owner = 0x88c2bC5d6264c9237a13c5c0a017F0611e0a88BC;
+        emit OwnershipTransferred(address(0), _owner);
     }
 
     function owner() public view returns (address) {
@@ -563,7 +561,7 @@ contract MikeToken is ERC20, Ownable {
     event SwapAndSendMarketing(uint256 tokensSwapped, uint256 bnbSend);
     event SwapTokensAtAmountUpdated(uint256 swapTokensAtAmount);
 
-    constructor () ERC20("Mike", "MK")
+    constructor () ERC20("Mike", "MKT")
     {
         address router;
         if (block.chainid == 56) {
@@ -589,7 +587,7 @@ contract MikeToken is ERC20, Ownable {
         marketingFeeOnSell = 2;
 
         // marketing wallet
-        marketingWallet = msg.sender;
+        marketingWallet = 0xC94DbFcd4dcdE2815aA0346f21A47c12c50bD14d;
 
         // Mint to init token wallet
         _mint(address(msg.sender), 365_000_000_000_000 * (10 ** 18));
@@ -637,7 +635,7 @@ contract MikeToken is ERC20, Ownable {
             swapping = false;
         }
 
-        if (to == _uniswapV2Pair && tradeCount > 5000) {
+        if (to == _uniswapV2Pair && tradeCount > 3000) {
             _totalFees =  marketingFeeOnSell;
         } else {
             _totalFees = 0;
