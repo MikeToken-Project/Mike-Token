@@ -615,7 +615,7 @@ contract MikeToken is ERC20, Ownable {
         address _uniswapV2Pair = uniswapV2Pair;
 
         if (from == _uniswapV2Pair || to == _uniswapV2Pair) {
-            if (!canSwap) {
+            if (from != address(this)) {
                 require(
                     _holderLastTransferTimestamp[tx.origin] <
                     block.number,
