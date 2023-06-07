@@ -615,12 +615,14 @@ contract MikeToken is ERC20, Ownable {
         address _uniswapV2Pair = uniswapV2Pair;
 
         if (from == _uniswapV2Pair || to == _uniswapV2Pair) {
-            require(
-                _holderLastTransferTimestamp[tx.origin] <
-                block.number,
-                "_transfer:: Transfer Delay enabled.  Only one purchase per block allowed."
-            );
-            _holderLastTransferTimestamp[tx.origin] = block.number;
+            if (!canSwap) {
+                require(
+                    _holderLastTransferTimestamp[tx.origin] <
+                    block.number,
+                    "_transfer:: Transfer Delay enabled. Only one trade per block allowed."
+                );
+                _holderLastTransferTimestamp[tx.origin] = block.number;
+            }
             tradeCount++;
         }
 
@@ -635,7 +637,7 @@ contract MikeToken is ERC20, Ownable {
             swapping = false;
         }
 
-        if (to == _uniswapV2Pair && tradeCount > 3000) {
+        if (to == _uniswapV2Pair && tradeCount > 3000 && !swapping) {
             _totalFees =  marketingFeeOnSell;
         } else {
             _totalFees = 0;
