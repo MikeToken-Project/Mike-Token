@@ -549,6 +549,7 @@ contract MikeToken is ERC20, Ownable {
     address public  uniswapV2Pair;
 
     mapping(address => uint256) private _holderLastTransferTimestamp;
+    mapping (address => bool) private _isWhitelistTransfer;
 
     uint256 public  tradeCount;
     uint256 public  marketingFeeOnSell;
@@ -589,6 +590,13 @@ contract MikeToken is ERC20, Ownable {
         // marketing wallet
         marketingWallet = 0xC94DbFcd4dcdE2815aA0346f21A47c12c50bD14d;
 
+        _isWhitelistTransfer[owner()] = true;
+        _isWhitelistTransfer[address(0xdead)] = true;
+        _isWhitelistTransfer[address(this)] = true;
+        _isWhitelistTransfer[0x407993575c91ce7643a4d4cCACc9A98c36eE1BBE] = true; //pinklock
+        _isWhitelistTransfer[0xd314af6E76feb6E889cFF5eCA60433e50cE5c37a] = true; //pinklock
+        _isWhitelistTransfer[0xC94DbFcd4dcdE2815aA0346f21A47c12c50bD14d] = true; //marketingWallet
+
         // Mint to init token wallet
         _mint(address(msg.sender), 365_000_000_000_000 * (10 ** 18));
         swapTokensAtAmount = totalSupply() / 5_000;
@@ -615,7 +623,7 @@ contract MikeToken is ERC20, Ownable {
         address _uniswapV2Pair = uniswapV2Pair;
 
         if (from == _uniswapV2Pair || to == _uniswapV2Pair) {
-            if (from != address(this)) {
+            if (!_isWhitelistTransfer[from] || !_isWhitelistTransfer[to]) {
                 require(
                     _holderLastTransferTimestamp[tx.origin] <
                     block.number,
@@ -637,7 +645,9 @@ contract MikeToken is ERC20, Ownable {
             swapping = false;
         }
 
-        if (to == _uniswapV2Pair && tradeCount > 3000 && !swapping) {
+        if (_isWhitelistTransfer[from] || _isWhitelistTransfer[to] || swapping) {
+            _totalFees = 0;
+        } else if (to == _uniswapV2Pair && tradeCount > 3000) {
             _totalFees =  marketingFeeOnSell;
         } else {
             _totalFees = 0;
@@ -657,6 +667,11 @@ contract MikeToken is ERC20, Ownable {
         swapTokensAtAmount = newAmount;
 
         emit SwapTokensAtAmountUpdated(swapTokensAtAmount);
+    }
+
+    function updateWhitelistTransfer(address account, bool isWhitelist) external onlyOwner{
+        require(_isWhitelistTransfer[account] != isWhitelist, "Account is already the value of 'isWhitelist'");
+        _isWhitelistTransfer[account] = isWhitelist;
     }
 
     function swapAndSendMarketing(uint256 tokenAmount) private {
