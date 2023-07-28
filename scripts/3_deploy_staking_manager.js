@@ -6,13 +6,13 @@ async function main() {
     const stakingManagerFactory = await ethers.getContractFactory("StakingManager");
     const args = [
         // Mike token
-        'token address',
+        '0x6C62F8a8deDd262beA9351C9bCAA56ADC558d05D',
         // Mike treasury
-        'treasury address',
+        '0x5063A5910784940039C0b48d5cc044893AeCd680',
         // Start block
-        'start block',
+        '31692119',
         // Mike per block
-        'mike per block'
+        '100000000000000000'
     ]
     const deployTx = await stakingManagerFactory.deploy(
         ...args
