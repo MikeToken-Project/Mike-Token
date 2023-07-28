@@ -244,9 +244,7 @@ contract StakingManager is Ownable, ReentrancyGuard {
             .mul(pool.allocPoint)
             .div(totalAllocPoint);
 
-        stakingMinted = stakingMinted.add(
-            mikeReward.add(mikeReward.div(10))
-        );
+        stakingMinted = stakingMinted.add(mikeReward.add(mikeReward.div(10)));
         mikeTreasury.mint(address(this), mikeReward);
         pool.accMikePerShare = pool.accMikePerShare.add(
             mikeReward.mul(1e12).div(lpSupply)
@@ -255,15 +253,16 @@ contract StakingManager is Ownable, ReentrancyGuard {
     }
 
     // Deposit LP tokens to MikeStakingManager for Mike allocation.
-    function deposit(
-        uint256 _pid,
-        uint256 _amount
-    ) public nonReentrant {
+    function deposit(uint256 _pid, uint256 _amount) public nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
-        if (user.amount >0) {
-            uint256 pending = user.amount.mul(pool.accMikePerShare).div(1e12).sub(user.rewardDebt);
+        if (user.amount > 0) {
+            uint256 pending = user
+                .amount
+                .mul(pool.accMikePerShare)
+                .div(1e12)
+                .sub(user.rewardDebt);
             if (pending > 0) {
                 uint256 harvestFee = pending.mul(pool.harvestFeeBP).div(10000);
                 safeMikeTransfer(feeAddress, harvestFee);
@@ -288,7 +287,9 @@ contract StakingManager is Ownable, ReentrancyGuard {
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        uint256 pending = user.amount.mul(pool.accMikePerShare).div(1e12).sub(user.rewardDebt);
+        uint256 pending = user.amount.mul(pool.accMikePerShare).div(1e12).sub(
+            user.rewardDebt
+        );
         if (pending > 0) {
             uint256 harvestFee = pending.mul(pool.harvestFeeBP).div(10000);
             safeMikeTransfer(feeAddress, harvestFee);
@@ -298,7 +299,10 @@ contract StakingManager is Ownable, ReentrancyGuard {
             user.amount = user.amount.sub(_amount);
             uint256 withdrawFee = _amount.mul(pool.withdrawFeeBP).div(10000);
             pool.lpToken.safeTransfer(feeAddress, withdrawFee);
-            pool.lpToken.safeTransfer(address(msg.sender), _amount.sub(withdrawFee));
+            pool.lpToken.safeTransfer(
+                address(msg.sender),
+                _amount.sub(withdrawFee)
+            );
         }
         user.rewardDebt = user.amount.mul(pool.accMikePerShare).div(1e12);
         emit Withdraw(msg.sender, _pid, _amount);
@@ -342,11 +346,7 @@ contract StakingManager is Ownable, ReentrancyGuard {
     // Pancake has to add hidden dummy pools in order to alter the emission, here we make it simple and transparent to all.
     function updateEmissionRate(uint256 _mikePerBlock) public onlyOwner {
         massUpdatePools();
-        emit EmissionRateUpdated(
-            msg.sender,
-            mikePerBlock,
-            _mikePerBlock
-        );
+        emit EmissionRateUpdated(msg.sender, mikePerBlock, _mikePerBlock);
         mikePerBlock = _mikePerBlock;
     }
 }
